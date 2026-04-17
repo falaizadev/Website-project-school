@@ -1,544 +1,213 @@
-(function($) {
+const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+});
 
-  "use strict";
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => {
+    lenis.raf(time * 1000);
+});
+gsap.ticker.lagSmoothing(0);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Template Name: limty
-  | Author: laralink
-  | Developer: Tamjid Bin Murtoza;
-  | Version: 1.0.0
-  |--------------------------------------------------------------------------
-  |--------------------------------------------------------------------------
-  | TABLE OF CONTENTS:
-  |--------------------------------------------------------------------------
-  |
-  | 1. Main Menu
-  | 2. Modal Video
-  | 3. Background Image
-  | 4. Owl Carousel
-  | 5. Progress Bar
-  | 6. Mailchimp
-  | 6. Ajax Contact Form
-  | 7. Isotop Initialize
-  | 8. Footer Sticky
-  |
-  */
+const cursorDot = document.querySelector('.cursor-dot');
+const cursorOutline = document.querySelector('.cursor-outline');
 
-  /*--------------------------------------------------------------
-    Scripts initialization
-  --------------------------------------------------------------*/
-  
-  $.exists = function(selector) {
-    return $(selector).length > 0;
-  };
+if (cursorDot && cursorOutline) {
+    const xDot = gsap.quickSetter(cursorDot, "x", "px");
+    const yDot = gsap.quickSetter(cursorDot, "y", "px");
+    const xOutline = gsap.quickSetter(cursorOutline, "x", "px");
+    const yOutline = gsap.quickSetter(cursorOutline, "y", "px");
 
-  $(window).on("load", function() {
-    $(window).trigger("scroll");
-    $(window).trigger("resize");
-    preloaderSetup();
-    isotopMsSetup();
-  });
-
-  $(document).on("ready", function() {
-    $(window).trigger("resize");
-    mobileMenu();
-    scrollFunction();
-    menuFunction();
-    modalVideo();
-    backgroundImage();
-    owlCarouselSetup();
-    progressBar();
-    contactForm();
-    isotopMsSetup();
-    stickyFooter();
-    tamjidCounterSetup();
-    mapBar();
-    new WOW().init();
-
-  });
-
-  $(window).on("resize", function() {
-    mobileMenu();
-    isotopMsSetup();
-    stickyFooter();
-  });
-
-  $(window).on("scroll", function() {
-    scrollFunction();
-  });
-
-  // Preloader
-  function preloaderSetup() {
-    $(".st-preloader-wave").fadeOut();
-    $("#st-preloader").delay(150).fadeOut("slow");
-  }
-  
-  /*--------------------------------------------------------------
-    1. Main Menu
-  --------------------------------------------------------------*/
-  // Main Menu function
-  function menuFunction() {
-    $('.st-nav-toggle').on('click', function() {
-      $(this).siblings('.st-nav').slideToggle();
-      $(this).toggleClass('st-active');
-    });
-    $('.st-has-children').append('<span class="st-dropdown-btn"></span>');
-    $('.st-dropdown-btn').on('click', function() {
-      $(this).siblings('ul, .st-megamenu-in, .st-vertical-megamenu-in').slideToggle('slow');
-      $(this).toggleClass('st-active');
+    window.addEventListener('mousemove', e => {
+        xDot(e.clientX);
+        yDot(e.clientY);
+        xOutline(e.clientX - 15);
+        yOutline(e.clientY - 15);
     });
 
-    // Mega Menu Tab
-    var megaTabEnd = 0;
-    var e;
-    $('.st-sub-megamenu-list li').on({
-      mouseenter: function() {
-        var $this = $(this);
-        if (megaTabEnd || $this.hasClass('active')) return false;
-        megaTabEnd = 1;
-        $this.siblings('.active').removeClass('active');
-        $this.addClass('active');
-        var index = $this.parent().parent().find('.st-sub-megamenu-list li').index(this);
-        $this.closest('.st-megamenu-in').find('.st-sub-megamenu-in.active').fadeOut(200, function() {
-          $(this).removeClass('active');
-          $this.closest('.st-megamenu-in').find('.st-sub-megamenu-in').eq(index).fadeIn(200, function() {
-            megaTabEnd = 0;
-            $(this).addClass('active');
-          });
-        });
-      },
-      mouseleave: function() {
-        $('.st-sub-megamenu-list li').siblings('.active').removeClass('active').addClass('active');
-      }
+    document.querySelectorAll('a, button, .absen-box').forEach(el => {
+        el.addEventListener('mouseenter', () => gsap.to(cursorOutline, { scale: 1.5, backgroundColor: "rgba(59, 130, 246, 0.1)", duration: 0.3 }));
+        el.addEventListener('mouseleave', () => gsap.to(cursorOutline, { scale: 1, backgroundColor: "transparent", duration: 0.3 }));
     });
-    $('.st-header .st-mobile-nav a').on('click', function() {
-      $('.st-nav').slideUp();
-      $('.st-nav-toggle').removeClass('st-active');
-    })
-  }
+}
 
-  // Mobile Menu
-  function mobileMenu() {
-    if ($(window).width() <= 991) {
-      $('.st-header').addClass('st-mobile-header');
-      $('.st-nav, .st-vertical-nav-wrap').addClass('st-mobile-nav').removeClass('st-desktop-nav');
-    } else {
-      $('.st-header').removeClass('st-mobile-header');
-      $('.st-nav, .st-vertical-nav-wrap').addClass('st-desktop-nav').removeClass('st-mobile-nav');
-    }
-  }
-
-  function scrollFunction() {
-    var scroll = $(window).scrollTop();
-    if (scroll >= 10) {
-      $('.st-header').addClass('st-sticky-active');
-      $('.st-sticky-menu .st-desktop-nav .st-vertical-nav-list').slideUp();
-      $('.st-vertical-nav-btn').removeClass('st-vertical-nav-perform');
-    } else {
-      $('.st-header').removeClass('st-sticky-active');
-      $('.st-sticky-menu .st-desktop-nav .st-vertical-nav-list').slideDown();
-      $('.st-vertical-nav-btn').addClass('st-vertical-nav-perform');
-    }
-  }
-
-  // Click To Go Top
-  $('.smooth-scroll').on('click', function() {
-    var thisAttr = $(this).attr('href');
-    if ($(thisAttr).length) {
-      var scrollPoint = $(thisAttr).offset().top - 50;
-      $('body,html').animate({
-        scrollTop: scrollPoint
-      }, 600);
-    }
-    return false;
-  });
-
-  // One Page Active Class
-  var topLimit = 300,
-  ultimateOffset = 200;
-
-  $('.onepage-nav').each(function() {
-    var $this = $(this),
-    $parent = $this.parent(),
-    current = null,
-    $findLinks = $this.find("a");
-
-    function getHeader(top) {
-      var last = $findLinks.first();
-      if (top < topLimit) {
-        return last;
-      }
-      for (var i = 0; i < $findLinks.length; i++) {
-        var $link = $findLinks.eq(i),
-        href = $link.attr("href");
-
-        if (href.charAt(0) === "#" && href.length > 1) {
-          var $anchor = $(href).first();
-          if ($anchor.length > 0) {
-            var offset = $anchor.offset();
-            if (top < offset.top - ultimateOffset) {
-              return last;
-            }
-            last = $link;
-          }
+window.addEventListener("load", () => {
+    const tl = gsap.timeline();
+    
+    tl.to("#loading-screen", {
+        opacity: 0,
+        duration: 1,
+        delay: 1.5, 
+        onComplete: () => {
+            document.getElementById("loading-screen").style.visibility = "hidden";
+            jalankanAnimasiHero();
         }
-      }
-      return last;
+    });
+});
+
+function jalankanAnimasiHero() {
+    const tlHero = gsap.timeline();
+
+    tlHero.from(".navbar", { y: -100, opacity: 0, duration: 1, ease: "power4.out" })
+          .from(".hero-text h1", { clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)", y: 50, duration: 1 }, "-=0.5")
+          .from(".hero-text p", { opacity: 0, y: 20, duration: 0.8 }, "-=0.5")
+          .from(".hero-image", { x: 100, opacity: 0, duration: 1.2, ease: "power2.out" }, "-=1");
+}
+
+const navLinks = document.querySelectorAll('.nav-menu li a');
+const navHoverBg = document.querySelector('.nav-hover-bg');
+
+if (navHoverBg) {
+    navLinks.forEach(link => {
+        link.addEventListener('mouseenter', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const parentRect = e.target.closest('.nav-menu').getBoundingClientRect();
+            
+            gsap.to(navHoverBg, {
+                opacity: 1,
+                scale: 1,
+                left: rect.left - parentRect.left,
+                width: rect.width,
+                height: rect.height,
+                duration: 0.4,
+                ease: "power3.out"
+            });
+        });
+
+        link.addEventListener('mouseleave', () => {
+            gsap.to(navHoverBg, { opacity: 0, scale: 0.8, duration: 0.3 });
+        });
+    });
+}
+
+gsap.registerPlugin(ScrollTrigger);
+
+ScrollTrigger.create({
+    start: "top -50",
+    onUpdate: (self) => {
+        const nav = document.querySelector('.navbar');
+        self.direction === 1 ? nav.classList.add('scrolled') : nav.classList.remove('scrolled');
+    }
+});
+
+const revealElements = document.querySelectorAll('.reveal-otomatis, .section-title, .card, .absen-box');
+revealElements.forEach((el) => {
+    gsap.from(el, {
+        scrollTrigger: {
+            trigger: el,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+        },
+        y: 50,
+        opacity: 0,
+        filter: "blur(10px)",
+        duration: 1,
+        ease: "power2.out"
+    });
+});
+
+if(document.querySelector('.hero')) {
+    gsap.to(".hero-image img", {
+        yPercent: 20,
+        ease: "none",
+        scrollTrigger: {
+            trigger: ".hero",
+            scrub: true
+        }
+    });
+}
+
+const menuToggle = document.querySelector('.menu-toggle');
+const navMenu = document.querySelector('.nav-menu');
+
+if(menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        const isActive = navMenu.classList.contains('active');
+        
+        gsap.to(navMenu, {
+            clipPath: isActive ? "circle(150% at 100% 0%)" : "circle(0% at 100% 0%)",
+            duration: 0.7,
+            ease: "power3.inOut"
+        });
+    });
+}
+
+const elemenSentuh = document.querySelectorAll('.absen-box, .pelajaran-card, .card');
+
+elemenSentuh.forEach(el => {
+    el.addEventListener('click', () => {
+        gsap.fromTo(el, 
+            { scale: 0.8, rotation: "random(-15, 15)" }, 
+            { scale: 1, rotation: 0, duration: 1, ease: "elastic.out(1, 0.3)" }
+        );
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    });
+});
+
+if (typeof THREE !== 'undefined') {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.domElement.style.position = 'fixed';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.zIndex = '-2'; 
+    renderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(renderer.domElement);
+
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 1500; 
+    const posArray = new Float32Array(particlesCount * 3);
+
+    for(let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10; 
     }
 
-    $(window).on("scroll", function() {
-      var top = window.scrollY,
-      height = $this.outerHeight(),
-      max_bottom = $parent.offset().top + $parent.outerHeight(),
-      bottom = top + height + ultimateOffset;
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-      var $current = getHeader(top);
-
-      if (current !== $current) {
-        $this.find(".active").removeClass("active");
-        $current.addClass("active");
-        current = $current;
-      }
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.02,
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
     });
 
-  });
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+    camera.position.z = 3;
 
-  /*--------------------------------------------------------------
-    2. Modal Video
-  --------------------------------------------------------------*/
-    function modalVideo() {
-      $(document).on('click', '.st-video-open', function(e) {
-        e.preventDefault();
-        var video = $(this).attr('href');
-        $('.st-video-popup-container iframe').attr('src', video);
-        $('.st-video-popup').addClass('active');
+    let mouseX = 0;
+    let mouseY = 0;
 
-      });
-      $('.st-video-popup-close, .st-video-popup-layer').on('click', function(e) {
-        $('.st-video-popup').removeClass('active');
-        $('html').removeClass('overflow-hidden');
-        $('.st-video-popup-container iframe').attr('src', 'about:blank')
-        e.preventDefault();
-      });
-    }
-
-  /*--------------------------------------------------------------
-    3. Background Image
-  --------------------------------------------------------------*/
-    function backgroundImage() {
-      if ($.exists(".st-bg")) {
-        $(".st-bg").each(function() {
-          var src = $(this).attr("data-src");
-          $(this).css({
-            "background-image": "url(" + src + ")"
-          });
-        });
-      }
-    }
-
-  /*--------------------------------------------------------------
-    4. Owl Carousel
-  --------------------------------------------------------------*/
-
-    function owlCarouselSetup() {
-      if ($.exists('.st-hero-slider1')) {
-        /* Owl Carousel For hero-slider-v1 */
-        $('.st-hero-slider1').owlCarousel({
-          items:1,
-          loop:true,
-          margin:0,
-          nav:true,
-          navText:['<i class="flaticon-left"></i>PREV', 'NEXT<i class="flaticon-right"></i>'],
-          dots:false,
-          autoplay:false,
-          autoplayHoverPause:false,
-          smartSpeed:500,
-          autoplayTimeout:5000         
-        });
-      }
-
-      // Service Carousel
-      if ($.exists('.st-service-carousel')) {
-        $('.st-service-carousel').owlCarousel({
-          loop:true,
-          margin:30,
-          nav:true,
-          dots:true,
-          navText:['<i class="flaticon-left"></i>', '<i class="flaticon-right"></i>'],
-          autoplay:false,
-          smartSpeed:1000,
-          autoplayTimeout:5000,
-          responsive:{
-            0:{
-              items:1
-            },
-            767:{
-              items:2
-            },
-            991:{
-              items:3
-            }
-          }
-        });
-      }
-
-      // Client Carousel
-      if ($.exists('.st-client-carousel')) {
-        $('.st-client-carousel').owlCarousel({
-          loop:true,
-          margin:30,
-          nav:false,
-          navText:false,
-          autoplay:false,
-          smartSpeed:1000,
-          autoplayTimeout:5000,
-          responsive:{
-            0:{
-              items:2
-            },
-            600:{
-              items:3
-            },
-            800:{
-              items:4
-            },
-            1000:{
-              items:5
-            }
-          }
-        });
-      }
-
-      // Project Carousel
-      if ($.exists('.st-project-carousel')) {
-        $('.st-project-carousel').owlCarousel({
-          loop:true,
-          margin:30,
-          nav:false,
-          navText:false,
-          dots:true,
-          autoplay:false,
-          smartSpeed:500,
-          autoplayTimeout:4000,
-          responsive:{
-            0:{
-              items:1
-            },
-            575:{
-              items:2
-            },
-            767:{
-              items:3
-            },
-            991:{
-              items:4
-            }
-          }
-        });
-      }
-
-      // Member Carousel
-      if ($.exists('.st-member-carousel')) {
-        $('.st-member-carousel').owlCarousel({
-          loop:true,
-          margin:30,
-          nav:true,
-          dots:true,
-          navText:['<i class="flaticon-left"></i>', '<i class="flaticon-right"></i>'],
-          autoplay:false,
-          smartSpeed:500,
-          autoplayTimeout:4000,
-          responsive:{
-            0:{
-              items:1
-            },
-            575:{
-              items:2
-            },
-            991:{
-              items:3
-            },
-            1199:{
-              items:4
-            }
-          }
-        });
-      }
-      // Testimonial Slider
-      if ($.exists('.st-testimonial-slider')) {
-        $('.st-testimonial-slider').owlCarousel({
-          items:1,
-          loop:true,
-          margin:0,
-          nav:true,
-          navText:['<i class="flaticon-left"></i>', '<i class="flaticon-right"></i>'],
-          dots:false,
-          autoplay:false,
-          autoplayHoverPause:false,
-          smartSpeed:500,
-          autoplayTimeout:5000         
-        });
-      }
-    }
-
-  /*--------------------------------------------------------------
-    5. Progress Bar
-  --------------------------------------------------------------*/
-    function progressBar() {
-    // .data('progress-percentage')
-    $(".st-progressbar").each(function() {
-      var progressPercentage = $(this).data("progress-percentage") + "%";
-      progressPercentage = "calc(" + progressPercentage + " - 4px)";
-      $(this).find(".st-progressbar-in").css("width", progressPercentage);
+    window.addEventListener('touchmove', (event) => {
+        mouseX = event.touches[0].clientX / window.innerWidth - 0.5;
+        mouseY = event.touches[0].clientY / window.innerHeight - 0.5;
     });
-  }
 
-  /*--------------------------------------------------------------
-    6. Mailchimp
-  --------------------------------------------------------------*/
-    if ($.exists('.mailchimp')) {
-     // active mailchimp 
-     if ($('.mailchimp').length > 0) {
-      $('.mailchimp').ajaxChimp({
-        language: 'es',
-        callback: mailchimpCallback
-      });
-    }
-
-    function mailchimpCallback(resp) {
-        // Check For Available Email
-        if (resp.result === 'success') {
-          $('.subscription-success').html('<i class="fa fa-check"></i><br/>' + resp.msg).fadeIn(1000);
-          $('.subscription-error').fadeOut(500);
-
-        } else if (resp.result === 'error') {
-          $('.subscription-error').html('<i class="fa fa-times"></i><br/>' + resp.msg).fadeIn(1000);
-        }
-      }
-    // Mailchimp Alart Message
-    $.ajaxChimp.translations.es = {
-      'submit': 'Submitting...',
-      0: 'We have sent you a confirmation email',
-      1: 'Please enter a value',
-      2: 'An email address must contain a single @',
-      3: 'The domain portion of the email address is invalid (the portion after the @: )',
-      4: 'The username portion of the email address is invalid (the portion before the @: )',
-      5: 'This email address looks fake or invalid. Please enter a real email address'
-    };
-  }
-
-  /*--------------------------------------------------------------
-    6. Ajax Contact Form
-  --------------------------------------------------------------*/
-    function contactForm() {
-
-      $('#cf-msg').hide();
-      $('#cf #submit').on('click', function() {
-        var name = $('#name').val();
-        var subject = $('#subject').val();
-        var email = $('#email').val();
-        var msg = $('#msg').val();
-        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-
-        if (!regex.test(email)) {
-          $('#cf-msg').fadeIn().html('<div class="alert alert-danger"><strong>Warning!</strong> Please Enter Valied Email.</div>');
-          return false;
-        }
-
-        name = $.trim(name);
-        subject = $.trim(subject);
-        email = $.trim(email);
-        msg = $.trim(msg);
-
-        if (name != '' && email != '' && msg != '') {
-          var values = "name=" + name + "&subject=" + subject + "&email=" + email + " &msg=" + msg;
-          $.ajax({
-            type: "POST",
-            url: "assets/php/mail.php",
-            data: values,
-            success: function() {
-              $('#name').val('');
-              $('#subject').val('');
-              $('#email').val('');
-              $('#msg').val('');
-
-              $('#cf-msg').fadeIn().html('<div class="alert alert-success"><strong>Success!</strong> Email has been sent successfully.</div>');
-              setTimeout(function() {
-                $('#cf-msg').fadeOut('slow');
-              }, 4000);
-            }
-          });
-        } else {
-          $('#cf-msg').fadeIn().html('<div class="alert alert-danger"><strong>Warning!</strong> All fields are required.</div>');
-        }
-        return false;
-      });
-
-    }
-
-
-  /*--------------------------------------------------------------
-    7. Isotop Initialize
-  --------------------------------------------------------------*/
-
-    function isotopMsSetup() {
-
-      if ($.exists('.st-isotop')) {
-        $('.st-isotop').isotope({
-          itemSelector: '.st-isotop-item',
-          transitionDuration: '0.60s',
-          percentPosition: true,
-          masonry: {
-            columnWidth: '.st-grid-sizer'
-          }
-        });
-        /* Active Class of Portfolio*/
-        $('.st-isotop-filter ul li').on('click', function(event) {
-          $(this).siblings('.active').removeClass('active');
-          $(this).addClass('active');
-          event.preventDefault();
-        });
-        /*=== Portfolio filtering ===*/
-        $('.st-isotop-filter ul').on('click', 'a', function() {
-          var filterElement = $(this).attr('data-filter');
-          $(this).parents('.st-isotop-filter').next().isotope({
-            filter: filterElement
-          });
-        });
-
-      }
-
-    }
-
-  /*--------------------------------------------------------------
-    8. Footer Sticky
-  --------------------------------------------------------------*/
-
-  function stickyFooter() {
-    // Sticky Footer
-    var footerHeight = ($('.st-sticky-footer').height());
-    var windowHeight = $(window).height();
-    var footerHeightPx = footerHeight + 'px';
-    $('.st-content').css("margin-bottom", footerHeightPx);
-  }
-
-  /*--------------------------------------------------------------
-    9. Tamjid Counter
-  --------------------------------------------------------------*/
-  function tamjidCounterSetup() {
-    $('.st-counter').tamjidCounter({
-      duration: 2000
+    window.addEventListener('mousemove', (event) => {
+        mouseX = event.clientX / window.innerWidth - 0.5;
+        mouseY = event.clientY / window.innerHeight - 0.5;
     });
-  }
 
-  /*--------------------------------------------------------------
-    10. Map Bar
-  --------------------------------------------------------------*/
-  function mapBar() {
-    $('.st-map-bar').on('click', function() {
-      $(this).toggleClass('st-bar-active').siblings('.st-map-wrpa').slideToggle();
-    })
-  }
-  
-})(jQuery); // End of use strict
+    function animate() {
+        requestAnimationFrame(animate);
+        particlesMesh.rotation.y += 0.001;
+        particlesMesh.rotation.x += 0.0005;
+        particlesMesh.rotation.y += mouseX * 0.05;
+        particlesMesh.rotation.x += mouseY * 0.05;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+}
